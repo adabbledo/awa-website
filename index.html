@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWA CSP — Tenacity for Hire</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap');
+
+        /* ═══════════════════════════════════════
+           RESET & BASE
+        ═══════════════════════════════════════ */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --root: #0a0a0a;
+            --trunk: #1a1a2e;
+            --branch: #e2c044;
+            --leaf: #52b788;
+            --vessel: #c9184a;
+            --lightning: #f4d35e;
+            --bg-dark: #0a0a0a;
+            --text-light: #f0ead2;
+            --text-muted: #6b705c;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            font-size: 16px;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* ═══════════════════════════════════════
+           THE NETWORK — SVG CANVAS
+        ═══════════════════════════════════════ */
+        #network-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.15;
+        }
+
+        #network-canvas path {
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* ═══════════════════════════════════════
+           SCROLL SECTIONS
+        ═══════════════════════════════════════ */
+        .section {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 40px;
+        }
+
+        .section-inner {
+            max-width: 900px;
+            width: 100%;
+            opacity: 0;
+            transform: translateY(60px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .section-inner.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ═══════════════════════════════════════
+           HERO
+        ═══════════════════════════════════════ */
+        #hero {
+            min-height: 100vh;
+            background: radial-gradient(ellipse at 50% 50%, #1a1a2e 0%, #0a0a0a 70%);
+            text-align: center;
+            flex-direction: column;
+        }
+
+        #hero .section-inner {
+            opacity: 1;
+            transform: none;
+        }
+
+        .hero-tagline {
+            font-family: 'Instrument Serif', serif;
+            font-size: clamp(3rem, 8vw, 7rem);
+            font-weight: 400;
+            line-height: 1.05;
+            letter-spacing: -0.02em;
+            color: var(--text-light);
+            margin-bottom: 24px;
+        }
+
+        .hero-tagline em {
+            font-style: italic;
+            color: var(--branch);
+        }
+
+        .hero-sub {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            font-weight: 300;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 48px;
+        }
+
+        .hero-node {
+            width: 12px;
+            height: 12px;
+            background: var(--branch);
+            border-radius: 50%;
+            margin: 0 auto;
+            box-shadow: 0 0 40px var(--branch), 0 0 80px rgba(226, 192, 68, 0.3);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 40px var(--branch), 0 0 80px rgba(226, 192, 68, 0.3); }
+            50% { transform: scale(1.5); box-shadow: 0 0 60px var(--branch), 0 0 120px rgba(226, 192, 68, 0.5); }
+        }
+
+        .scroll-hint {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            animation: drift 2s ease-in-out infinite;
+        }
+
+        @keyframes drift {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(8px); }
+        }
+
+        /* ═══════════════════════════════════════
+           SECTION LABELS & TYPOGRAPHY
+        ═══════════════════════════════════════ */
+        .section-label {
+            font-size: 0.7rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--branch);
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+
+        .section-title {
+            font-family: 'Instrument Serif', serif;
+            font-size: clamp(2rem, 5vw, 4rem);
+            font-weight: 400;
+            line-height: 1.1;
+            margin-bottom: 32px;
+            color: var(--text-light);
+        }
+
+        .section-body {
+            font-size: 1.15rem;
+            line-height: 1.8;
+            color: #a8a29e;
+            max-width: 680px;
+        }
+
+        .section-body strong {
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        /* ═══════════════════════════════════════
+           MANIFESTO — stacked statements
+        ═══════════════════════════════════════ */
+        .manifesto {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 40px 0;
+        }
+
+        .manifesto-line {
+            font-family: 'Instrument Serif', serif;
+            font-size: clamp(1.3rem, 3vw, 2rem);
+            line-height: 1.3;
+            color: var(--text-light);
+            padding-left: 24px;
+            border-left: 2px solid rgba(226, 192, 68, 0.2);
+            transition: border-color 0.4s ease, color 0.4s ease;
+        }
+
+        .manifesto-line:hover {
+            border-left-color: var(--branch);
+        }
+
+        .manifesto-line span {
+            color: var(--branch);
+        }
+
+        /* ═══════════════════════════════════════
+           OPERATING PRINCIPLES — cards
+        ═══════════════════════════════════════ */
+        .principles-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin: 48px 0;
+        }
+
+        .principle-card {
+            background: rgba(26, 26, 46, 0.5);
+            border: 1px solid rgba(226, 192, 68, 0.08);
+            border-radius: 12px;
+            padding: 32px;
+            transition: border-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .principle-card:hover {
+            border-color: rgba(226, 192, 68, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .principle-icon {
+            font-size: 1.8rem;
+            margin-bottom: 16px;
+            line-height: 1;
+        }
+
+        .principle-heading {
+            font-family: 'Instrument Serif', serif;
+            font-size: 1.35rem;
+            color: var(--text-light);
+            margin-bottom: 12px;
+        }
+
+        .principle-text {
+            font-size: 0.95rem;
+            color: #a8a29e;
+            line-height: 1.6;
+        }
+
+        /* ═══════════════════════════════════════
+           DOMAINS — horizontal strip
+        ═══════════════════════════════════════ */
+        .domains {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 40px 0;
+        }
+
+        .domain-tag {
+            padding: 12px 24px;
+            border: 1px solid rgba(226, 192, 68, 0.2);
+            border-radius: 100px;
+            font-size: 0.85rem;
+            letter-spacing: 0.08em;
+            color: #a8a29e;
+            transition: all 0.3s ease;
+        }
+
+        .domain-tag:hover {
+            border-color: var(--branch);
+            color: var(--branch);
+        }
+
+        .domain-note {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            font-style: italic;
+            margin-top: 32px;
+            line-height: 1.7;
+        }
+
+        /* ═══════════════════════════════════════
+           QUOTE BLOCKS
+        ═══════════════════════════════════════ */
+        .pull-quote {
+            font-family: 'Instrument Serif', serif;
+            font-size: clamp(1.5rem, 3.5vw, 2.5rem);
+            font-style: italic;
+            color: var(--branch);
+            text-align: center;
+            padding: 80px 40px;
+            line-height: 1.4;
+        }
+
+        .pull-quote .attr {
+            display: block;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.8rem;
+            font-style: normal;
+            color: var(--text-muted);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-top: 24px;
+        }
+
+        /* ═══════════════════════════════════════
+           TEAM
+        ═══════════════════════════════════════ */
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 48px;
+            margin: 48px 0;
+        }
+
+        .team-card {
+            text-align: center;
+        }
+
+        .team-photo {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            margin: 0 auto 24px;
+            overflow: hidden;
+            border: 2px solid var(--branch);
+            box-shadow: 0 0 30px rgba(226, 192, 68, 0.15);
+            background: #1a1a2e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .team-photo-placeholder {
+            font-size: 2.5rem;
+            color: var(--branch);
+            opacity: 0.4;
+        }
+
+        .team-name {
+            font-family: 'Instrument Serif', serif;
+            font-size: 1.5rem;
+            color: var(--text-light);
+            margin-bottom: 4px;
+        }
+
+        .team-role {
+            font-size: 0.8rem;
+            color: var(--branch);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+
+        .team-vibe {
+            font-size: 0.95rem;
+            color: #a8a29e;
+            line-height: 1.7;
+            font-style: italic;
+        }
+
+        /* ═══════════════════════════════════════
+           CTA
+        ═══════════════════════════════════════ */
+        #contact {
+            background: radial-gradient(ellipse at 50% 80%, #1a1a2e 0%, #0a0a0a 70%);
+            text-align: center;
+        }
+
+        .cta-title {
+            font-family: 'Instrument Serif', serif;
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            color: var(--text-light);
+            margin-bottom: 24px;
+            line-height: 1.05;
+        }
+
+        .cta-body {
+            font-size: 1.15rem;
+            color: #a8a29e;
+            max-width: 520px;
+            margin: 0 auto 40px;
+            line-height: 1.7;
+        }
+
+        .cta-link {
+            display: inline-block;
+            padding: 16px 48px;
+            border: 1px solid var(--branch);
+            color: var(--branch);
+            text-decoration: none;
+            font-size: 0.85rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .cta-link:hover {
+            background: var(--branch);
+            color: var(--bg-dark);
+        }
+
+        /* ═══════════════════════════════════════
+           FOOTER
+        ═══════════════════════════════════════ */
+        footer {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+        }
+
+        footer .brand-phrases {
+            margin-bottom: 16px;
+            font-style: italic;
+            color: #6b705c;
+        }
+
+        /* ═══════════════════════════════════════
+           RESPONSIVE
+        ═══════════════════════════════════════ */
+        @media (max-width: 768px) {
+            .section { padding: 60px 24px; }
+            .principles-grid { grid-template-columns: 1fr; }
+            .team-grid { grid-template-columns: 1fr; gap: 40px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ════════════════════════════════════════
+         BIFURCATING NETWORK — grows with scroll
+    ════════════════════════════════════════ -->
+    <svg id="network-canvas" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice">
+        <defs>
+            <filter id="glow">
+                <feGaussianBlur stdDeviation="3" result="blur"/>
+                <feMerge>
+                    <feMergeNode in="blur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+            </filter>
+        </defs>
+        <g id="network-paths" filter="url(#glow)"></g>
+    </svg>
+
+    <!-- ════════════════════════════════════════
+         HERO
+    ════════════════════════════════════════ -->
+    <section id="hero" class="section">
+        <div class="section-inner">
+            <div class="hero-sub">AWA CSP</div>
+            <h1 class="hero-tagline">Tenacity<br>for <em>hire.</em></h1>
+            <div class="hero-node"></div>
+        </div>
+        <div class="scroll-hint">scroll</div>
+    </section>
+
+    <!-- ════════════════════════════════════════
+         IDENTITY — who we are in 10 seconds
+    ════════════════════════════════════════ -->
+    <section class="section">
+        <div class="section-inner">
+            <div class="section-label">Who we are</div>
+            <h2 class="section-title">We walk into<br>broken things.</h2>
+            <div class="section-body">
+                <p>Other people's problems are our starting point. The worse it looks, the more interesting it is. We don't consult from the sidelines — <strong>we get in, we fix it, we build it into something worth having.</strong></p>
+            </div>
+
+            <div class="manifesto">
+                <div class="manifesto-line"><span>We don't need a manual.</span> We've got 20,000+ hours of figuring it out.</div>
+                <div class="manifesto-line"><span>We're honest.</span> Some bets work. Some don't. We'll tell you about both.</div>
+                <div class="manifesto-line"><span>We're fast.</span> No committees. Decision to action in hours, not quarters.</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ════════════════════════════════════════
+         QUOTE BREAK
+    ════════════════════════════════════════ -->
+    <section class="section" style="min-height: 60vh;">
+        <div class="section-inner">
+            <div class="pull-quote">
+                "Learn to laugh when you stub your toe and life is easy."
+                <span class="attr">Honey Badger</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ════════════════════════════════════════
+         HOW WE OPERATE — principles
+    ════════════════════════════════════════ -->
+    <section class="section">
+        <div class="section-inner">
+            <div class="section-label">How we operate</div>
+            <h2 class="section-title">The model is simple.<br>The work isn't.</h2>
+
+            <div class="principles-grid">
+                <div class="principle-card">
+                    <div class="principle-icon" style="color: var(--vessel);">&#9670;</div>
+                    <div class="principle-heading">Find the mess.</div>
+                    <div class="principle-text">Broken companies, stalled projects, industries full of people who've given up. That's where the value is. Everyone else sees risk. We see the fix.</div>
+                </div>
+
+                <div class="principle-card">
+                    <div class="principle-icon" style="color: var(--branch);">&#9670;</div>
+                    <div class="principle-heading">Assemble the right people.</div>
+                    <div class="principle-text">We don't do everything ourselves. We find who's needed, bring them in, and build around the problem. The team changes with the work.</div>
+                </div>
+
+                <div class="principle-card">
+                    <div class="principle-icon" style="color: var(--leaf);">&#9670;</div>
+                    <div class="principle-heading">Execute.</div>
+                    <div class="principle-text">Not a pitch deck. Not a strategy document. Hands in the machine, building the thing, solving the problems as they come. That's the only part that counts.</div>
+                </div>
+
+                <div class="principle-card">
+                    <div class="principle-icon" style="color: var(--lightning);">&#9670;</div>
+                    <div class="principle-heading">Value up. Risk down.</div>
+                    <div class="principle-text">Every decision pushes in the same direction — make it worth more, make it less likely to fail. Growth and exit. That's the model.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ════════════════════════════════════════
+         QUOTE BREAK
+    ════════════════════════════════════════ -->
+    <section class="section" style="min-height: 60vh;">
+        <div class="section-inner">
+            <div class="pull-quote">
+                "Hope for the best, plan for the worst."
+                <span class="attr">Honey Badger</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ════════════════════════════════════════
+         WHERE WE PLAY — domains, not case studies
+    ════════════════════════════════════════ -->
+    <section class="section">
+        <div class="section-inner">
+            <div class="section-label">Where we play</div>
+            <h2 class="section-title">Cross-domain.<br>By design.</h2>
+            <div class="section-body">
+                <p>The problem decides the industry, not the other way around. We go where things are broken and interesting.</p>
+            </div>
+
+            <div class="domains">
+                <div class="domain-tag">GMP Pharmaceutical Manufacturing</div>
+                <div class="domain-tag">TGA Regulatory &amp; Compliance</div>
+                <div class="domain-tag">Medical Devices</div>
+                <div class="domain-tag">Industrial Processing</div>
+                <div class="domain-tag">M&amp;A Strategy</div>
+                <div class="domain-tag">Patient Access</div>
+                <div class="domain-tag">Brand Development</div>
+                <div class="domain-tag">Fund Management</div>
+            </div>
+
+            <div class="domain-note">We've taken a company from a negative $7M balance sheet to $40M/year. We've navigated 18 months of TGA regulatory pathways. We've deployed $300K in equipment and watched it flop. All of it teaches the same thing — move fast, stay honest, adapt.</div>
+        </div>
+    </section>
+
+    <!-- ════════════════════════════════════════
+         QUOTE BREAK
+    ════════════════════════════════════════ -->
+    <section class="section" style="min-height: 50vh;">
+        <div class="section-inner">
+            <div class="pull-quote">
+                "Faith in science, hope in magic."
+                <span class="attr">Honey Badger</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ════════════════════════════════════════
+         CTA
+    ════════════════════════════════════════ -->
+    <section id="contact" class="section">
+        <div class="section-inner">
+            <h2 class="cta-title">Got something<br>broken?</h2>
+            <div class="cta-body">
+                We're always looking for the next mess worth fixing — and the right people to fix it with.
+            </div>
+            <a href="mailto:andre@awacsp.com" class="cta-link">Start a conversation</a>
+        </div>
+    </section>
+
+    <!-- ════════════════════════════════════════
+         FOOTER
+    ════════════════════════════════════════ -->
+    <footer>
+        <div class="brand-phrases">
+            "Tenacity for hire" · "Learn to laugh when you stub your toe" · "Hope for the best, plan for the worst" · "Faith in science, hope in magic"
+        </div>
+        <div>"Life is about who you know and how you treat them."</div>
+        <br>
+        <div>AWA CSP &copy; 2026</div>
+    </footer>
+
+    <!-- ════════════════════════════════════════
+         JAVASCRIPT — BIFURCATING NETWORK + SCROLL
+    ════════════════════════════════════════ -->
+    <script>
+        // ═══════════════════════════════════════
+        // BIFURCATING NETWORK GENERATOR
+        // ═══════════════════════════════════════
+        const NetworkGenerator = {
+            paths: [],
+            colors: ['#e2c044', '#52b788', '#c9184a', '#f4d35e', '#a8a29e'],
+
+            generate() {
+                this.paths = [];
+                this.branch(500, 950, -90, 180, 8, 0);
+                return this.paths;
+            },
+
+            branch(x, y, angle, length, depth, colorIdx) {
+                if (depth <= 0 || length < 4) return;
+
+                const radians = (angle * Math.PI) / 180;
+                const x2 = x + Math.cos(radians) * length;
+                const y2 = y + Math.sin(radians) * length;
+
+                const cx = (x + x2) / 2 + (Math.random() - 0.5) * length * 0.3;
+                const cy = (y + y2) / 2 + (Math.random() - 0.5) * length * 0.3;
+
+                this.paths.push({
+                    d: `M ${x} ${y} Q ${cx} ${cy} ${x2} ${y2}`,
+                    width: Math.max(0.5, depth * 0.4),
+                    color: this.colors[colorIdx % this.colors.length],
+                    depth: depth,
+                    length: this.paths.length
+                });
+
+                const spread = 20 + (8 - depth) * 5 + Math.random() * 15;
+                const shrink = 0.62 + Math.random() * 0.15;
+
+                this.branch(x2, y2, angle - spread, length * shrink, depth - 1, colorIdx);
+                this.branch(x2, y2, angle + spread, length * shrink, depth - 1, (colorIdx + 1));
+
+                if (Math.random() > 0.7 && depth > 3) {
+                    const mutAngle = angle + (Math.random() - 0.5) * spread * 2;
+                    this.branch(x2, y2, mutAngle, length * shrink * 0.8, depth - 2, (colorIdx + 2));
+                }
+            }
+        };
+
+        // ═══════════════════════════════════════
+        // RENDER NETWORK
+        // ═══════════════════════════════════════
+        const networkGroup = document.getElementById('network-paths');
+        const allPaths = NetworkGenerator.generate();
+        allPaths.sort((a, b) => b.depth - a.depth);
+
+        const svgNS = 'http://www.w3.org/2000/svg';
+        const pathElements = [];
+
+        allPaths.forEach((p, i) => {
+            const path = document.createElementNS(svgNS, 'path');
+            path.setAttribute('d', p.d);
+            path.setAttribute('stroke', p.color);
+            path.setAttribute('stroke-width', p.width);
+            path.setAttribute('opacity', '0');
+            networkGroup.appendChild(path);
+
+            const totalLength = path.getTotalLength();
+            path.style.strokeDasharray = totalLength;
+            path.style.strokeDashoffset = totalLength;
+
+            pathElements.push({
+                el: path,
+                totalLength: totalLength,
+                revealAt: i / allPaths.length
+            });
+        });
+
+        // ═══════════════════════════════════════
+        // SCROLL OBSERVER — Reveal sections
+        // ═══════════════════════════════════════
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.15 });
+
+        document.querySelectorAll('.section-inner').forEach(el => {
+            observer.observe(el);
+        });
+
+        // ═══════════════════════════════════════
+        // SCROLL HANDLER — Grow network
+        // ═══════════════════════════════════════
+        let ticking = false;
+
+        function getScrollProgress() {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            return Math.min(1, Math.max(0, scrollTop / docHeight));
+        }
+
+        function updateNetwork() {
+            const progress = getScrollProgress();
+
+            pathElements.forEach((p) => {
+                if (progress >= p.revealAt) {
+                    const localProgress = Math.min(1, (progress - p.revealAt) * allPaths.length * 0.15);
+                    p.el.setAttribute('opacity', localProgress * 0.8);
+                    p.el.style.strokeDashoffset = p.totalLength * (1 - localProgress);
+                } else {
+                    p.el.setAttribute('opacity', '0');
+                    p.el.style.strokeDashoffset = p.totalLength;
+                }
+            });
+        }
+
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                requestAnimationFrame(() => {
+                    updateNetwork();
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        });
+
+        updateNetwork();
+    </script>
+</body>
+</html>
