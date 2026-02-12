@@ -63,15 +63,14 @@
         .section {
             position: relative;
             z-index: 1;
-            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 80px 40px;
+            padding: 100px 60px;
         }
 
         .section-inner {
-            max-width: 900px;
+            max-width: 1100px;
             width: 100%;
             opacity: 0;
             transform: translateY(60px);
@@ -87,7 +86,7 @@
            HERO
         ═══════════════════════════════════════ */
         #hero {
-            min-height: 100vh;
+            min-height: 90vh;
             background: radial-gradient(ellipse at 50% 50%, #1a1a2e 0%, #0a0a0a 70%);
             text-align: center;
             flex-direction: column;
@@ -179,7 +178,7 @@
             font-size: 1.15rem;
             line-height: 1.8;
             color: #a8a29e;
-            max-width: 680px;
+            max-width: 800px;
         }
 
         .section-body strong {
@@ -238,17 +237,24 @@
             transform: translateY(-2px);
         }
 
-        .principle-icon {
-            font-size: 1.8rem;
+        .principle-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
             margin-bottom: 16px;
+        }
+
+        .principle-icon {
+            font-size: 1.2rem;
             line-height: 1;
+            flex-shrink: 0;
         }
 
         .principle-heading {
             font-family: 'Instrument Serif', serif;
-            font-size: 1.35rem;
+            font-size: 1.5rem;
             color: var(--text-light);
-            margin-bottom: 12px;
+            letter-spacing: 0.01em;
         }
 
         .principle-text {
@@ -299,7 +305,7 @@
             font-style: italic;
             color: var(--branch);
             text-align: center;
-            padding: 80px 40px;
+            padding: 40px 40px;
             line-height: 1.4;
         }
 
@@ -389,7 +395,7 @@
         .cta-body {
             font-size: 1.15rem;
             color: #a8a29e;
-            max-width: 520px;
+            max-width: 640px;
             margin: 0 auto 40px;
             line-height: 1.7;
         }
@@ -425,8 +431,10 @@
 
         footer .brand-phrases {
             margin-bottom: 16px;
+            font-family: 'Instrument Serif', serif;
             font-style: italic;
-            color: #6b705c;
+            font-size: 1.1rem;
+            color: #a8a29e;
         }
 
         /* ═══════════════════════════════════════
@@ -434,8 +442,16 @@
         ═══════════════════════════════════════ */
         @media (max-width: 768px) {
             .section { padding: 60px 24px; }
+            #hero { min-height: 100vh; }
             .principles-grid { grid-template-columns: 1fr; }
             .team-grid { grid-template-columns: 1fr; gap: 40px; }
+        }
+
+        @media (min-width: 1400px) {
+            .section-inner { max-width: 1200px; }
+            .section-body { max-width: 880px; }
+            .principles-grid { gap: 32px; }
+            .principle-card { padding: 40px; }
         }
     </style>
 </head>
@@ -491,7 +507,7 @@
     <!-- ════════════════════════════════════════
          QUOTE BREAK
     ════════════════════════════════════════ -->
-    <section class="section" style="min-height: 60vh;">
+    <section class="section">
         <div class="section-inner">
             <div class="pull-quote">
                 "Learn to laugh when you stub your toe and life is easy."
@@ -510,26 +526,34 @@
 
             <div class="principles-grid">
                 <div class="principle-card">
-                    <div class="principle-icon" style="color: var(--vessel);">&#9670;</div>
-                    <div class="principle-heading">Find the mess.</div>
+                    <div class="principle-header">
+                        <div class="principle-icon" style="color: var(--vessel);">&#9670;</div>
+                        <div class="principle-heading">Find the mess.</div>
+                    </div>
                     <div class="principle-text">Broken companies, stalled projects, industries full of people who've given up. That's where the value is. Everyone else sees risk. We see the fix.</div>
                 </div>
 
                 <div class="principle-card">
-                    <div class="principle-icon" style="color: var(--branch);">&#9670;</div>
-                    <div class="principle-heading">Assemble the right people.</div>
+                    <div class="principle-header">
+                        <div class="principle-icon" style="color: var(--branch);">&#9670;</div>
+                        <div class="principle-heading">Assemble the right people.</div>
+                    </div>
                     <div class="principle-text">We don't do everything ourselves. We find who's needed, bring them in, and build around the problem. The team changes with the work.</div>
                 </div>
 
                 <div class="principle-card">
-                    <div class="principle-icon" style="color: var(--leaf);">&#9670;</div>
-                    <div class="principle-heading">Execute.</div>
+                    <div class="principle-header">
+                        <div class="principle-icon" style="color: var(--leaf);">&#9670;</div>
+                        <div class="principle-heading">Execute.</div>
+                    </div>
                     <div class="principle-text">Not a pitch deck. Not a strategy document. Hands in the machine, building the thing, solving the problems as they come. That's the only part that counts.</div>
                 </div>
 
                 <div class="principle-card">
-                    <div class="principle-icon" style="color: var(--lightning);">&#9670;</div>
-                    <div class="principle-heading">Value up. Risk down.</div>
+                    <div class="principle-header">
+                        <div class="principle-icon" style="color: var(--lightning);">&#9670;</div>
+                        <div class="principle-heading">Value up. Risk down.</div>
+                    </div>
                     <div class="principle-text">Every decision pushes in the same direction — make it worth more, make it less likely to fail. Growth and exit. That's the model.</div>
                 </div>
             </div>
@@ -539,7 +563,7 @@
     <!-- ════════════════════════════════════════
          QUOTE BREAK
     ════════════════════════════════════════ -->
-    <section class="section" style="min-height: 60vh;">
+    <section class="section">
         <div class="section-inner">
             <div class="pull-quote">
                 "Hope for the best, plan for the worst."
@@ -577,7 +601,7 @@
     <!-- ════════════════════════════════════════
          QUOTE BREAK
     ════════════════════════════════════════ -->
-    <section class="section" style="min-height: 50vh;">
+    <section class="section">
         <div class="section-inner">
             <div class="pull-quote">
                 "Faith in science, hope in magic."
@@ -603,10 +627,7 @@
          FOOTER
     ════════════════════════════════════════ -->
     <footer>
-        <div class="brand-phrases">
-            "Tenacity for hire" · "Learn to laugh when you stub your toe" · "Hope for the best, plan for the worst" · "Faith in science, hope in magic"
-        </div>
-        <div>"Life is about who you know and how you treat them."</div>
+        <div class="brand-phrases">"Life is about who you know and how you treat them."</div>
         <br>
         <div>AWA CSP &copy; 2026</div>
     </footer>
